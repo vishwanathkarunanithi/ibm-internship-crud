@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 function App() {
   const [students, setStudents] = useState([]);
 
-  // This fetches data from your Node Engine
+  // Fetch data from the Engine every time the page loads
   useEffect(() => {
     fetch('http://localhost:5000/students')
       .then(res => res.json())
@@ -13,26 +13,30 @@ function App() {
 
   return (
     <div style={{ padding: "50px", fontFamily: "Arial", textAlign: "center" }}>
-      <h1>IBM Internship Task</h1>
-      <h3>Student List</h3>
+      <h1>IBM Class List</h1>
+      <p><em>(Use Postman to add new students)</em></p>
       
       {students.length > 0 ? (
-        <ul style={{ listStyleType: "none", padding: 0 }}>
+        <ul style={{ listStyle: "none", padding: 0 }}>
           {students.map((student) => (
             <li key={student.id} style={{ 
               background: "#f4f4f4", 
               margin: "10px auto", 
-              padding: "10px", 
+              padding: "15px", 
               width: "300px",
-              borderRadius: "5px"
+              borderRadius: "8px",
+              boxShadow: "0px 2px 5px rgba(0,0,0,0.1)"
             }}>
-              <strong>{student.name}</strong> <br/> 
-              <span style={{color: "gray"}}>{student.dept}</span>
+              <strong style={{fontSize: "18px"}}>{student.name}</strong> 
+              <br/> 
+              <span style={{color: "gray"}}>Dept: {student.dept}</span>
+              <br/>
+              <span style={{color: "blue", fontWeight: "bold"}}>Age: {student.age}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <p>Loading... (If this takes long, check if Backend is running!)</p>
+        <p>Loading data...</p>
       )}
     </div>
   );

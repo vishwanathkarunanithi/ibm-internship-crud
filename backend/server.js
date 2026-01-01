@@ -5,54 +5,71 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = 5000;
 
-// Middleware
-app.use(cors()); // Allows frontend to connect
-app.use(bodyParser.json()); // Allows us to read JSON data
+// --- Middleware ---
+app.use(cors());
+app.use(bodyParser.json());
 
-// 1. Data Storage (Simulated Database)
+// --- 1. DATA STORAGE (In-Memory Array) ---
+// Note: This resets every time you restart the server
 let students = [
-    { id: 1, name: "Vishwanath", dept: "ECE" }
+    { id: 1, name: "Vishwanath", dept: "ECE", age: 21 },
+    { id: 2, name: "Vijay", dept: "CSE", age: 22 },
+    {
+        id: 3,
+        name: "Suriya",
+        dept: "Mechanical",
+        age: 23
+    },
+    {
+        id: 4,
+        name: "Rajesh",
+        dept: "ECE",
+        age: 20
+    }
 ];
 
-// 2. ROUTES (The CRUD operations)
-
-// READ (GET): Get all students
+// --- 2. READ (GET Request) ---
 app.get('/students', (req, res) => {
     res.json(students);
 });
 
-// CREATE (POST): Add a new student
+// --- 3. CREATE (POST Request) ---
 app.post('/students', (req, res) => {
-    const newStudent = {
-        id: students.length + 1, // Auto-increment ID
-        name: req.body.name,
-        dept: req.body.dept
-    };
-    students.push(newStudent);
-    res.status(201).json({ message: "Student added", student: newStudent });
-});
+    const newStudent = req.body;
 
-// UPDATE (PUT): Update a student's details
-app.put('/students/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const studentIndex = students.findIndex(s => s.id === id);
-
-    if (studentIndex !== -1) {
-        students[studentIndex] = { id: id, ...req.body };
-        res.json({ message: "Student updated", student: students[studentIndex] });
-    } else {
-        res.status(404).json({ message: "Student not found" });
+    // Basic validation: ensure name and dept exist
+    if (!newStudent.name || !newStudent.dept) {
+        return res.status(400).json({ msg: "Please include name and department" });
     }
+
+    // Assign a new ID automatically
+    newStudent.id = students.length + 1;
+    
+    // Add to the array
+    students.push(newStudent);
+    
+    // Respond with the updated list
+    res.json(students);
 });
 
-// DELETE (DELETE): Remove a student
-app.delete('/students/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    students = students.filter(s => s.id !== id);
-    res.json({ message: "Student deleted" });
-});
-
-// 3. Start Server
+// --- 4. START SERVER (CRITICAL PART) ---
+// This command keeps the server alive and listening
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+});
+// --- 5. UPDATE (PUT Request) ---
+app.put('/students/:id', (req, res) => {
+    const id = parseInt(req.params.id); // Get the ID from the URL
+    const updatedData = req.body; // Get the new data from Postman
+
+    // Find the student in the list
+    const index = students.findIndex(student => student.id === id);
+
+    if (index !== -1) {
+        // Update the student details
+        students[index] = { ...students[index], ...updatedData };
+        res.json(students); // Send back the updated list
+    } else {
+        res.status(404).json({ message: "Student not found!" });
+    }
 });
